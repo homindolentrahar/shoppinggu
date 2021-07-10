@@ -4,9 +4,11 @@ import 'package:shoppinggu/providers/cart.dart';
 import 'package:shoppinggu/providers/orders.dart';
 import 'package:shoppinggu/providers/products.dart';
 import 'package:shoppinggu/ui/screens/cart_screen.dart';
+import 'package:shoppinggu/ui/screens/edit_product_screen.dart';
 import 'package:shoppinggu/ui/screens/orders_screen.dart';
 import 'package:shoppinggu/ui/screens/product_detail_screen.dart';
 import 'package:shoppinggu/ui/screens/products_overview_screen.dart';
+import 'package:shoppinggu/ui/screens/user_products_screen.dart';
 import 'package:shoppinggu/ui/themes/theme.dart';
 
 void main() {
@@ -31,6 +33,8 @@ class MyApp extends StatelessWidget {
           ProductDetailScreen.route: (ctx) => ProductDetailScreen(),
           CartScreen.route: (ctx) => CartScreen(),
           OrdersScreen.route: (ctx) => OrdersScreen(),
+          UserProductsScreen.route: (ctx) => UserProductsScreen(),
+          EditProductScreen.route: (ctx) => EditProductScreen(),
         },
       ),
     );

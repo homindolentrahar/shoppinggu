@@ -30,7 +30,7 @@ class ProductItem extends StatelessWidget {
             alignment: Alignment.bottomCenter,
             children: [
               Hero(
-                tag: product.id,
+                tag: product.id.toString(),
                 child: Image.network(
                   product.imageUrl,
                   width: double.infinity,
@@ -71,7 +71,9 @@ class ProductItem extends StatelessWidget {
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
                       color: ColorPalette.black.withOpacity(0.85),
                       borderRadius: BorderRadius.circular(16),
@@ -115,6 +117,35 @@ class ProductItem extends StatelessWidget {
                             borderRadius: BorderRadius.circular(16),
                             onTap: () {
                               cart.addItem(product);
+                              ScaffoldMessenger.of(context)
+                                  .hideCurrentSnackBar();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  margin: const EdgeInsets.all(16),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 8,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  backgroundColor:
+                                      ColorPalette.black.withOpacity(0.85),
+                                  content: Text(
+                                    "Item added to cart",
+                                  ),
+                                  behavior: SnackBarBehavior.floating,
+                                  duration: Duration(milliseconds: 1500),
+                                  action: SnackBarAction(
+                                    label: "Undo",
+                                    textColor: Theme.of(context).primaryColor,
+                                    onPressed: () {
+                                      cart.removeSingleItem(
+                                          product.id.toString());
+                                    },
+                                  ),
+                                ),
+                              );
                             },
                           ),
                         ),

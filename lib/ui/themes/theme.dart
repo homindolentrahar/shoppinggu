@@ -10,6 +10,7 @@ class ColorPalette {
   static const light = Color(0xFFF3F0F3);
   static const black = Color(0xFF202530);
   static const dark = Color(0xFF404540);
+  static const grey = Color(0xFFE5E5E5);
 }
 
 final appTheme = ThemeData(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:shoppinggu/ui/screens/orders_screen.dart';
+import 'package:shoppinggu/ui/screens/user_products_screen.dart';
 
 class AppDrawer extends StatelessWidget {
   @override
@@ -23,6 +24,14 @@ class AppDrawer extends StatelessWidget {
             title: Text("Orders"),
             onTap: () =>
                 Navigator.of(context).pushReplacementNamed(OrdersScreen.route),
+          ),
+          Divider(),
+          ListTile(
+            leading: Icon(Ionicons.cube),
+            title: Text("Manage Products"),
+            onTap: () => Navigator.of(context).pushReplacementNamed(
+              UserProductsScreen.route,
+            ),
           ),
         ],
       ),

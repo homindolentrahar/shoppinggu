@@ -46,7 +46,7 @@ class _OrderListItemState extends State<OrderListItem> {
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Text(
-                          "x${widget.order.products.length}",
+                          "x ${widget.order.products.length}",
                           style: Theme.of(context)
                               .textTheme
                               .subtitle1
@@ -109,7 +109,7 @@ class _OrderListItemState extends State<OrderListItem> {
                                     borderRadius: BorderRadius.circular(16),
                                   ),
                                   child: Text(
-                                    "x${product.quantity}",
+                                    "x ${product.quantity}",
                                     style: Theme.of(context)
                                         .textTheme
                                         .subtitle1

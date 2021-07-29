@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:provider/provider.dart';
 import 'package:shoppinggu/providers/cart.dart';
@@ -72,8 +73,27 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
           ],
         ),
         drawer: AppDrawer(),
-        body: _ProductsGrid(
-          showFavs: _showOnlyFavorites,
+        body: FutureBuilder(
+          future: Provider.of<Products>(context).fetchProducts(),
+          builder: (ctx, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(
+                child: SpinKitChasingDots(
+                  color: Theme.of(context).primaryColor,
+                ),
+              );
+            } else {
+              if (snapshot.error != null) {
+                return Center(
+                  child: Text("Error occurred :("),
+                );
+              } else {
+                return _ProductsGrid(
+                  showFavs: _showOnlyFavorites,
+                );
+              }
+            }
+          },
         ),
       ),
     );
@@ -87,25 +107,24 @@ class _ProductsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<Products>(context);
-    final products = showFavs ? provider.favoriteItems : provider.items;
-
-    return GridView.builder(
-      physics: BouncingScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 1.3 / 2,
-        mainAxisSpacing: 8,
-        crossAxisSpacing: 8,
+    return Consumer<Products>(
+      builder: (ctx, data, child) => GridView.builder(
+        physics: BouncingScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          childAspectRatio: 1.3 / 2,
+          mainAxisSpacing: 8,
+          crossAxisSpacing: 8,
+        ),
+        itemCount: data.items.length,
+        itemBuilder: (ctx, index) {
+          return ChangeNotifierProvider.value(
+            value: data.items[index],
+            child: ProductItem(),
+          );
+        },
       ),
-      itemCount: products.length,
-      itemBuilder: (ctx, index) {
-        return ChangeNotifierProvider.value(
-          value: products[index],
-          child: ProductItem(),
-        );
-      },
     );
   }
 }

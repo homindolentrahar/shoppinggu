@@ -4,7 +4,7 @@ import 'package:shoppinggu/ui/themes/theme.dart';
 class PrimaryActionButton extends StatelessWidget {
   final String text;
   final IconData? iconData;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   const PrimaryActionButton({
     Key? key,

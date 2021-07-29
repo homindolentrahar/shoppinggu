@@ -68,20 +68,49 @@ class CartScreen extends StatelessWidget {
                 ],
               ),
             ),
-            PrimaryActionButton(
-              iconData: Ionicons.cash,
-              text: "Checkout",
-              onPressed: () {
-                Provider.of<Orders>(context, listen: false).addOrder(
-                  cart.items.values.toList(),
-                  cart.totalAmount,
-                );
-                cart.clear();
-              },
-            ),
+            _OrderButton(cart: cart),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _OrderButton extends StatefulWidget {
+  const _OrderButton({
+    Key? key,
+    required this.cart,
+  }) : super(key: key);
+
+  final Cart cart;
+
+  @override
+  __OrderButtonState createState() => __OrderButtonState();
+}
+
+class __OrderButtonState extends State<_OrderButton> {
+  var _isLoading = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return PrimaryActionButton(
+      iconData: Ionicons.cash,
+      text: "Checkout",
+      onPressed: (widget.cart.totalAmount <= 0 || _isLoading)
+          ? null
+          : () async {
+              setState(() {
+                _isLoading = true;
+              });
+              await Provider.of<Orders>(context, listen: false).addOrder(
+                widget.cart.items.values.toList(),
+                widget.cart.totalAmount,
+              );
+              setState(() {
+                _isLoading = false;
+              });
+              widget.cart.clear();
+            },
     );
   }
 }

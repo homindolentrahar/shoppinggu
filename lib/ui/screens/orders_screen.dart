@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
 import 'package:shoppinggu/providers/orders.dart';
 import 'package:shoppinggu/ui/widgets/app_drawer.dart';
@@ -11,20 +12,39 @@ class OrdersScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final orders = Provider.of<Orders>(context);
-
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
           title: Text("Your Orders"),
         ),
         drawer: AppDrawer(),
-        body: ListView.builder(
-          physics: BouncingScrollPhysics(),
-          itemCount: orders.orders.length,
-          itemBuilder: (ctx, index) => OrderListItem(
-            order: orders.orders[index],
-          ),
+        body: FutureBuilder(
+          future: Provider.of<Orders>(context, listen: false).fetchOrders(),
+          builder: (ctx, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(
+                child: SpinKitChasingDots(
+                  color: Theme.of(context).primaryColor,
+                ),
+              );
+            } else {
+              if (snapshot.error != null) {
+                return Center(
+                  child: Text("Error happened :("),
+                );
+              } else {
+                return Consumer<Orders>(
+                  builder: (ctx, data, child) => ListView.builder(
+                    physics: BouncingScrollPhysics(),
+                    itemCount: data.orders.length,
+                    itemBuilder: (ctx, index) => OrderListItem(
+                      order: data.orders[index],
+                    ),
+                  ),
+                );
+              }
+            }
+          },
         ),
       ),
     );

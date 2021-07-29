@@ -1,39 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/widgets.dart';
+import 'package:shoppinggu/models/http_exception.dart';
 import 'package:shoppinggu/providers/product.dart';
+import 'package:http/http.dart' as http;
 
 class Products with ChangeNotifier {
-  List<Product> _items = [
-    Product(
-        id: 'p1',
-        title: 'Red Shirt',
-        description: 'A red shirt - it is pretty red!',
-        price: 29.99,
-        imageUrl:
-            'https://www.static-src.com/wcsstore/Indraprastha/images/catalog/full//103/MTA-11949565/wellborn_company_wellborn_ss_carved_red_t-shirt_full01_en8psmih.jpg'),
-    Product(
-      id: 'p2',
-      title: 'Trousers',
-      description: 'A nice pair of trousers.',
-      price: 59.99,
-      imageUrl:
-          'https://assets.myntassets.com/fl_progressive/h_960,q_80,w_720/v1/assets/images/6993400/2018/7/30/b3d5f951-1149-4217-81a9-f50cb646fa3f1532928738800-PANIT-Women-Trousers-6611532928738642-1.jpg',
-    ),
-    Product(
-      id: 'p3',
-      title: 'Yellow Scarf',
-      description: 'Warm and cozy - exactly what you need for the winter.',
-      price: 19.99,
-      imageUrl:
-          'https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg',
-    ),
-    Product(
-        id: 'p4',
-        title: 'A Pan',
-        description: 'Prepare any meal you want.',
-        price: 49.99,
-        imageUrl:
-            'https://target.scene7.com/is/image/Target/GUEST_458a8723-a558-4c34-8bdb-513a05c87b6a?wid=488&hei=488&fmt=pjpeg'),
-  ];
+  List<Product> _items = [];
 
   List<Product> get favoriteItems =>
       _items.where((prod) => prod.isFavorite).toList();
@@ -44,28 +17,94 @@ class Products with ChangeNotifier {
     return _items.firstWhere((prod) => prod.id == productId);
   }
 
-  void addProduct(Product product) {
-    final newProduct = Product(
-      id: DateTime.now().toString(),
-      title: product.title,
-      description: product.description,
-      price: product.price,
-      imageUrl: product.imageUrl,
-    );
-    _items.add(newProduct);
-    notifyListeners();
+  Future<void> fetchProducts() async {
+    final url = Uri.parse(
+        "https://shoppinggu-ad120-default-rtdb.firebaseio.com/products.json");
+
+    try {
+      final response = await http.get(url);
+      final extractedData = json.decode(response.body) as Map<String, dynamic>;
+      final List<Product> loadedProducts = [];
+      extractedData.forEach((prodId, product) {
+        loadedProducts.add(Product(
+            id: prodId,
+            title: product['title'],
+            description: product['description'],
+            price: product['price'],
+            imageUrl: product['imageUrl'],
+            isFavorite: product['isFavorite']));
+      });
+      _items = loadedProducts;
+      notifyListeners();
+    } catch (error) {
+      throw (error);
+    }
   }
 
-  void updateProduct(String productId, Product product) {
+  Future<void> addProduct(Product product) async {
+    final url = Uri.parse(
+        "https://shoppinggu-ad120-default-rtdb.firebaseio.com/products.json");
+
+    try {
+      final response = await http.post(url,
+          body: json.encode({
+            'title': product.title,
+            'description': product.description,
+            'imageUrl': product.imageUrl,
+            'price': product.price,
+            'isFavorite': product.isFavorite,
+          }));
+      final id = json.decode(response.body)['name'];
+      final newProduct = Product(
+        id: id,
+        title: product.title,
+        description: product.description,
+        price: product.price,
+        imageUrl: product.imageUrl,
+      );
+      _items.add(newProduct);
+      notifyListeners();
+    } catch (error) {
+      print(error);
+      throw error;
+    }
+  }
+
+  Future<void> updateProduct(String productId, Product product) async {
     final prodIndex = _items.indexWhere((prod) => prod.id == productId);
     if (prodIndex >= 0) {
+      final url = Uri.parse(
+          "https://shoppinggu-ad120-default-rtdb.firebaseio.com/products/$productId.json");
+      await http.patch(url,
+          body: json.encode({
+            'title': product.title,
+            'description': product.description,
+            'imageUrl': product.imageUrl,
+            'price': product.price
+          }));
+
       _items[prodIndex] = product;
       notifyListeners();
     }
   }
 
-  void deleteProduct(String productId) {
-    _items.removeWhere((prod) => prod.id == productId);
+  Future<void> deleteProduct(String productId) async {
+    final url = Uri.parse(
+        "https://shoppinggu-ad120-default-rtdb.firebaseio.com/products/$productId.json");
+    final existingProductIndex =
+        _items.indexWhere((prod) => prod.id == productId);
+    Product? existingProduct = _items[existingProductIndex];
+
+    _items.removeAt(existingProductIndex);
     notifyListeners();
+
+    final response = await http.delete(url);
+
+    if (response.statusCode >= 400) {
+      _items.insert(existingProductIndex, existingProduct);
+      notifyListeners();
+      throw HttpException("Could not delete product");
+    }
+    existingProduct = null;
   }
 }
